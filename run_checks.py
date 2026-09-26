@@ -32,6 +32,9 @@ def t_break_md():
 def t_empty():
     md = render_markdown({"Added": [], "Fixed": [], "Changed": [], "Removed": []}, None, "HEAD")
     assert "No notable changes" in md
+def t_unknown():
+    c, _, _ = classify("weird: something happened", "")
+    assert c in ("Added", "Fixed", "Changed", "Removed")
 def t_git():
     with tempfile.TemporaryDirectory() as d:
         def g(*a): subprocess.run(["git"] + list(a), cwd=d, check=True, capture_output=True)
@@ -42,7 +45,7 @@ def t_git():
         assert get_last_tag(d) == "v0.1.0"
         cs = get_commits("v0.1.0", "HEAD", d); assert len(cs) == 1
 
-for i, (n, f) in enumerate([("feat", t_feat), ("fix", t_fix), ("refactor", t_ref), ("remove", t_rm), ("breaking-!", t_br1), ("breaking-body", t_br2), ("scope", t_scope), ("kw-fix", t_kw_fix), ("kw-add", t_kw_add), ("kw-rm", t_kw_rm), ("kw-changed", t_kw_ch), ("order", t_order), ("breaking-md", t_break_md), ("empty", t_empty), ("git-integration", t_git)], 1):
+for i, (n, f) in enumerate([("feat", t_feat), ("fix", t_fix), ("refactor", t_ref), ("remove", t_rm), ("breaking-!", t_br1), ("breaking-body", t_br2), ("scope", t_scope), ("kw-fix", t_kw_fix), ("kw-add", t_kw_add), ("kw-rm", t_kw_rm), ("kw-changed", t_kw_ch), ("unknown-type", t_unknown), ("order", t_order), ("breaking-md", t_break_md), ("empty", t_empty), ("git-integration", t_git)], 1):
     check("%02d-%s" % (i, n), f)
 print("== %d passed, %d failed ==" % (passed, failed))
 sys.exit(1 if failed else 0)
